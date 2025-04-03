@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Login</h2>
+        <form id="login-form">
+            <label for="username">Username:</label>
+            <input type="text" id="username" required>
+            
+            <label for="password">Password:</label>
+            <input type="password" id="password" required>
+            
+            <button type="submit">Login</button>
+        </form>
+        <p id="message"></p>
+    </div>
+    
+    <script>
+        document.getElementById("login-form").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const clientId = "6sql8nm3pe7vioptas6au44os6"; 
+            const region = "ap-southeast-2"; 
+
+            const response = await fetch(`https://cognito-idp.${region}.amazonaws.com/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-amz-json-1.1",
+                    "X-Amz-Target": "AWSCognitoIdentityProviderService.InitiateAuth"
+                },
+                body: JSON.stringify({
+                    AuthFlow: "USER_PASSWORD_AUTH",
+                    ClientId: clientId,
+                    AuthParameters: {
+                        USERNAME: username,
+                        PASSWORD: password
+                    }
+                })
+            });
+            
+            const data = await response.json();
+            if (data.AuthenticationResult) {
+                document.getElementById("message").innerText = "Login successful! Redirecting...";
+                
+                // Redirect to the Cognito Hosted UI with the response_type=code
+                const redirectUri = encodeURIComponent("https://search-rag-chatbot-open-search-6xcknzvqwwjasylmoe4p2hv6jy.ap-southeast-2.es.amazonaws.com/_dashboards/app/home");
+                window.location.href = `https://ap-southeast-2u0lpnnsnu.auth.ap-southeast-2.amazoncognito.com/login?client_id=${clientId}&response_type=code&scope=email+openid+phone+profile&redirect_uri=${redirectUri}`;
+            } else {
+                document.getElementById("message").innerText = "Login failed! Check credentials.";
+            }
+        });
+    </script>
+</body>
+</html>

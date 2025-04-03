@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processing Login...</title>
+</head>
+<body>
+    <p>Logging you in...</p>
+
+    <script>
+        async function exchangeCodeForToken() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get("code");
+
+            if (!code) {
+                document.body.innerHTML = "<p>Error: No authentication code found.</p>";
+                return;
+            }
+
+            const clientId = "6sql8nm3pe7vioptas6au44os6";
+            const clientSecret = "fifcbv113stlt4vtvr7272v5u64hm7qthg8hs94beugj06a6tgt";  // Replace with actual secret
+            const redirectUri = "https://http://rag-chatbot-knowledge.s3-website-ap-southeast-2.amazonaws.com/callback.html";
+
+            const response = await fetch("https://ap-southeast-2u0lpnnsnu.auth.ap-southeast-2.amazoncognito.com/oauth2/token", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: new URLSearchParams({
+                    grant_type: "authorization_code",
+                    client_id: clientId,
+                    client_secret: clientSecret,
+                    code: code,
+                    redirect_uri: redirectUri
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.access_token) {
+                // Store the token (optional)
+                localStorage.setItem("access_token", data.access_token);
+
+                // Redirect to OpenSearch Dashboard
+                window.location.href = "https://search-rag-chatbot-open-search-6xcknzvqwwjasylmoe4p2hv6jy.ap-southeast-2.es.amazonaws.com/_dashboards/app/home";
+            } else {
+                document.body.innerHTML = `<p>Login failed: ${JSON.stringify(data)}</p>`;
+            }
+        }
+
+        exchangeCodeForToken();
+    </script>
+</body>
+</html>
